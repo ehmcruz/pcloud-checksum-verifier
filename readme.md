@@ -12,5 +12,5 @@ Steps:
 1. Copy **auth.json.sample** to **auth.json**.
 2. Fill **auth.json** with the authentication token and location ID provided by pCloud.
 
-Never make **auth.json** public.
+Never make **auth.json** public.  
 NEVER!!!

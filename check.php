@@ -1,6 +1,9 @@
 <?php
 
-$credentialPath = "./data/app.cred";
+$auth_file = "auth.json";
+$auth_data = json_decode(file_get_contents($auth_file), true);
+$access_token = $auth_data['token'];
+$locationid = $auth_data['locationid'];
 
 require_once("./lib-pcloud/autoload.php");
 
@@ -20,7 +23,7 @@ $type = "sha1";
 
 function load_hash_file ($pCloudApp, $checksum_file_id)
 {
-	$pCloudHashFile = new pCloud\File($pCloudApp);
+	$pCloudHashFile = new pCloud\Sdk\File($pCloudApp);
 	$pCloudHashFile->download($checksum_file_id, "/tmp/");
 
 	$checksum_file = "/tmp/checksum.sha1";
@@ -71,19 +74,14 @@ function cmp_hash_from_file ($hashes, $fname, $hash)
 }
 
 try {
-	$pCloudApp = new pCloud\App();
-
-	$cred = pCloud\Auth::getAuth($credentialPath);
-
-	$access_token = $cred['access_token'];
-	$locationid = 1;
-
+	$pCloudApp = new pCloud\Sdk\App();
 	$pCloudApp->setAccessToken($access_token);
 	$pCloudApp->setLocationId($locationid);
+	//$pCloudApp->setCurlExecutionTimeout(10);
 
 	$hashes = load_hash_file($pCloudApp, $checksum_file_id);
 
-	$pCloudFolder = new pCloud\Folder($pCloudApp);
+	$pCloudFolder = new pCloud\Sdk\Folder($pCloudApp);
 
 	$meta = $pCloudFolder->getMetadata($folderid)->metadata;
 
@@ -116,7 +114,7 @@ try {
 	
 	foreach ($content as $item) {
 		if (!$item->isfolder) {
-			$pCloudFile = new pCloud\File($pCloudApp);
+			$pCloudFile = new pCloud\Sdk\File($pCloudApp);
 			$info = $pCloudFile->getInfo($item->fileid);
 			$mf = $info->metadata;
 			

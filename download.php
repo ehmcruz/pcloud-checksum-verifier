@@ -23,7 +23,7 @@ try {
 	$pCloudApp = new pCloud\Sdk\App();
 	$pCloudApp->setAccessToken($access_token);
 	$pCloudApp->setLocationId($locationid);
-	$pCloudApp->setCurlExecutionTimeout(10);
+	//$pCloudApp->setCurlExecutionTimeout(10);
 
 	$pCloudFolder = new pCloud\Sdk\Folder($pCloudApp);
 

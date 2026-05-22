@@ -5,7 +5,10 @@ function cmp_flist ($a, $b)
     return strcmp($a->name, $b->name);
 }
 
-$credentialPath = "./data/app.cred";
+$auth_file = "auth.json";
+$auth_data = json_decode(file_get_contents($auth_file), true);
+$access_token = $auth_data['token'];
+$locationid = $auth_data['locationid'];
 
 require_once("./lib-pcloud/autoload.php");
 
@@ -15,17 +18,12 @@ else
 	$folderid = 0;
 
 try {
-	$pCloudApp = new pCloud\App();
-
-	$cred = pCloud\Auth::getAuth($credentialPath);
-
-	$access_token = $cred['access_token'];
-	$locationid = 1;
-
+	$pCloudApp = new pCloud\Sdk\App();
 	$pCloudApp->setAccessToken($access_token);
 	$pCloudApp->setLocationId($locationid);
+	$pCloudApp->setCurlExecutionTimeout(10);
 
-	$pCloudFolder = new pCloud\Folder($pCloudApp);
+	$pCloudFolder = new pCloud\Sdk\Folder($pCloudApp);
 
 	echo "<ul style=\"list-style-type: none;\">";
 	
@@ -33,7 +31,7 @@ try {
 	
 	$content = $pCloudFolder->getContent($folderid);
 	
-	echo "Current folder: {$meta->name} (<a href=\"download.php?folderid=$folderid&type=md5\">md5</a>)<br>\n<br>\n";
+	echo "Current folder: {$meta->name} (<a href=\"download.php?folderid=$folderid&type=md5\">md5</a> <a href=\"download.php?folderid=$folderid&type=sha1\">sha1</a>)<br>\n<br>\n";
 	
 	if ($folderid != 0)
 		echo "<li><a href=\"index.php?folderid={$meta->parentfolderid}\">..</a></li>\n";

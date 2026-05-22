@@ -2,7 +2,10 @@
 
 header("Content-Type: text/plain");
 
-$credentialPath = "./data/app.cred";
+$auth_file = "auth.json";
+$auth_data = json_decode(file_get_contents($auth_file), true);
+$access_token = $auth_data['token'];
+$locationid = $auth_data['locationid'];
 
 require_once("./lib-pcloud/autoload.php");
 
@@ -17,17 +20,12 @@ else
 	$type = "sha1";
 
 try {
-	$pCloudApp = new pCloud\App();
-
-	$cred = pCloud\Auth::getAuth($credentialPath);
-
-	$access_token = $cred['access_token'];
-	$locationid = 1;
-
+	$pCloudApp = new pCloud\Sdk\App();
 	$pCloudApp->setAccessToken($access_token);
 	$pCloudApp->setLocationId($locationid);
+	$pCloudApp->setCurlExecutionTimeout(10);
 
-	$pCloudFolder = new pCloud\Folder($pCloudApp);
+	$pCloudFolder = new pCloud\Sdk\Folder($pCloudApp);
 
 	$meta = $pCloudFolder->getMetadata($folderid)->metadata;
 	
@@ -35,11 +33,16 @@ try {
 	
 	foreach ($content as $item) {
 		if (!$item->isfolder) {
-			$pCloudFile = new pCloud\File($pCloudApp);
+			$pCloudFile = new pCloud\Sdk\File($pCloudApp);
 			$info = $pCloudFile->getInfo($item->fileid);
 			$mf = $info->metadata;
+
+			if ($type == "md5")
+				$hash = $info->md5;
+			else
+				$hash = $info->sha1;
 			
-			echo "{$info->sha1}  {$item->name}\n";
+			echo "{$hash}  {$item->name}\n";
 		}
 	}
 } catch (Exception $e) {
